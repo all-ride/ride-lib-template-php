@@ -1,15 +1,17 @@
 <?php
 
-namespace pallo\library\template;
+namespace pallo\library\template\engine;
 
 use pallo\library\template\exception\ResourceNotFoundException;
 use pallo\library\template\exception\ResourceNotSetException;
+use pallo\library\template\theme\ThemeModel;
+use pallo\library\template\Template;
 use pallo\library\system\file\browser\FileBrowser;
 
 /**
  * Plain PHP template engine
  */
-class PhpTemplateEngine extends AbstractTemplateEngine {
+class PhpEngine extends AbstractEngine {
 
     /**
      * Name of this template engine
@@ -30,22 +32,16 @@ class PhpTemplateEngine extends AbstractTemplateEngine {
     protected $path;
 
     /**
-     * Machine name of the current theme
-     * @var string
-     */
-    protected $theme;
-
-    /**
      * Constructs a new PHP template engine
      * @param pallo\library\system\file\browser\FileBrowser $fileBrowser
      * @param string $path
      * @return null
      */
-    public function __construct(FileBrowser $fileBrowser, $path = null) {
+    public function __construct(FileBrowser $fileBrowser, ThemeModel $themeModel, $path = null) {
         $this->fileBrowser = $fileBrowser;
 
+        $this->setThemeModel($themeModel);
         $this->setPath($path);
-        $this->setTheme(null);
     }
 
     /**
@@ -64,25 +60,6 @@ class PhpTemplateEngine extends AbstractTemplateEngine {
     }
 
     /**
-     * Sets the current theme
-     * @param string $theme Machine name of the theme
-     * @return null
-     */
-    public function setTheme($theme = null) {
-        if ($theme === null) {
-            $this->theme = 'default';
-
-            return;
-        }
-
-        if (!is_string($theme) || !$theme) {
-            throw new TemplateException('Could not set the theme: provided theme is empty or invalid');
-        }
-
-        $this->theme = $theme;
-    }
-
-    /**
      * Renders a template
      * @param pallo\library\template\Template $template Template to render
      * @return string Rendered template
@@ -92,12 +69,7 @@ class PhpTemplateEngine extends AbstractTemplateEngine {
      * the template resource could not be found by the engine
      */
     public function render(Template $template) {
-        $resource = $template->getResource();
-        if (!$resource) {
-            throw new ResourceNotSetException();
-        }
-
-        $templateFile = $this->getTemplateFile($resource);
+        $templateFile = $this->getTemplateFile($template);
 
         extract($template->getVariables());
 
@@ -111,22 +83,36 @@ class PhpTemplateEngine extends AbstractTemplateEngine {
 
     /**
      * Gets the template file for the provided resource
-     * @param string $resource Resource of the template
+     * @param pallo\library\template\Template $template
      * @return string Absolute path of the template file
      * @throws pallo\library\template\exception\ResourceNotFoundException
      */
-    public function getTemplateFile($resource) {
-        if ($this->theme) {
-            try {
-                $file = $this->getThemeTemplateFile($name, $this->theme);
-            } catch (TemplateNotFoundException $exception) {
-                $file = $this->getThemeTemplateFile($name, 'default');
+    public function getTemplateFile(Template $template) {
+        $resource = $template->getResource();
+        if (!$resource) {
+            throw new ResourceNotSetException();
+        }
+
+        $file = null;
+
+        $themeHierarchy = $this->getTheme($template);
+        if ($themeHierarchy) {
+            foreach ($themeHierarchy as $theme => $null) {
+                try {
+                    $file = $this->getThemeTemplateFile($name, $theme);
+
+                    break;
+                } catch (ResourceNotFoundException $exception) {
+                    $file = null;
+                }
             }
-        } else {
+        }
+
+        if (!$file) {
             $file = $this->getThemeTemplateFile($name);
         }
 
-        return $file->getAbsolutePath;
+        return $file->getAbsolutePath();
     }
 
     /**
