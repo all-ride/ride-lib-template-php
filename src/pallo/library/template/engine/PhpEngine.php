@@ -20,6 +20,12 @@ class PhpEngine extends AbstractEngine {
     const NAME = 'php';
 
     /**
+     * Extension for the template resources
+     * @var string
+     */
+    const EXTENSION = 'php';
+
+    /**
      * Instance of the file browser
      * @var pallo\library\system\file\browser\FileBrowser
      */
@@ -69,7 +75,7 @@ class PhpEngine extends AbstractEngine {
      * the template resource could not be found by the engine
      */
     public function render(Template $template) {
-        $templateFile = $this->getTemplateFile($template);
+        $templateFile = $this->getFile($template);
 
         extract($template->getVariables());
 
@@ -82,12 +88,16 @@ class PhpEngine extends AbstractEngine {
     }
 
     /**
-     * Gets the template file for the provided resource
-     * @param pallo\library\template\Template $template
-     * @return string Absolute path of the template file
-     * @throws pallo\library\template\exception\ResourceNotFoundException
+     * Gets the template resource
+     * @param pallo\library\template\Template $template Template to get the
+     * resource of
+     * @return string Absolute path of the template resource
+     * @throws pallo\library\template\exception\ResourceNotSetException when
+     * no template was set to the template
+     * @throws pallo\library\template\exception\ResourceNotFoundException when
+     * the template could not be found by the engine
      */
-    public function getTemplateFile(Template $template) {
+    public function getFile(Template $template) {
         $resource = $template->getResource();
         if (!$resource) {
             throw new ResourceNotSetException();
@@ -132,19 +142,11 @@ class PhpEngine extends AbstractEngine {
             $path .= $theme . '/';
         }
 
-        $file = $path . '/' . $resource . '.php';
+        $file = $path . '/' . $resource . '.' . self::EXTENSION;
 
         $file = $this->fileBrowser->getFile($file);
         if (!$file) {
-            if ($this->theme != 'default') {
-                $file = $path . self::NAME . '/default/' . $resource . '.php';
-
-                $file = $this->fileBrowser->getFile($file);
-            }
-
-            if (!$file) {
-                throw new ResourceNotFoundException($path . self::NAME . '/' . $this->theme . '/' . $resource . '.php');
-            }
+            throw new ResourceNotFoundException($path . '/' . $resource . '.' . self::EXTENSION);
         }
 
         return $file;
