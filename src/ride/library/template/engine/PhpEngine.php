@@ -4,7 +4,6 @@ namespace ride\library\template\engine;
 
 use ride\library\template\exception\ResourceNotFoundException;
 use ride\library\template\exception\ResourceNotSetException;
-use ride\library\template\theme\ThemeModel;
 use ride\library\template\Template;
 use ride\library\system\file\browser\FileBrowser;
 
@@ -43,10 +42,9 @@ class PhpEngine extends AbstractEngine {
      * @param string $path
      * @return null
      */
-    public function __construct(FileBrowser $fileBrowser, ThemeModel $themeModel, $path = null) {
+    public function __construct(FileBrowser $fileBrowser, $path = null) {
         $this->fileBrowser = $fileBrowser;
 
-        $this->setThemeModel($themeModel);
         $this->setPath($path);
     }
 
