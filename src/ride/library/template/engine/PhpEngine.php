@@ -4,7 +4,6 @@ namespace ride\library\template\engine;
 
 use ride\library\template\exception\ResourceNotFoundException;
 use ride\library\template\exception\ResourceNotSetException;
-use ride\library\template\theme\ThemeModel;
 use ride\library\template\Template;
 use ride\library\system\file\browser\FileBrowser;
 
@@ -27,7 +26,7 @@ class PhpEngine extends AbstractEngine {
 
     /**
      * Instance of the file browser
-     * @var ride\library\system\file\browser\FileBrowser
+     * @var \ride\library\system\file\browser\FileBrowser
      */
     protected $fileBrowser;
 
@@ -39,14 +38,13 @@ class PhpEngine extends AbstractEngine {
 
     /**
      * Constructs a new PHP template engine
-     * @param ride\library\system\file\browser\FileBrowser $fileBrowser
+     * @param \ride\library\system\file\browser\FileBrowser $fileBrowser
      * @param string $path
      * @return null
      */
-    public function __construct(FileBrowser $fileBrowser, ThemeModel $themeModel, $path = null) {
+    public function __construct(FileBrowser $fileBrowser, $path = null) {
         $this->fileBrowser = $fileBrowser;
 
-        $this->setThemeModel($themeModel);
         $this->setPath($path);
     }
 
@@ -54,7 +52,7 @@ class PhpEngine extends AbstractEngine {
      * Sets the path for the file browser
      * @param string $path
      * @return null
-     * @throws ride\library\template\exception\TemplateException when the
+     * @throws \ride\library\template\exception\TemplateException when the
      * provided path is invalid or empty
      */
     public function setPath($path) {
@@ -67,11 +65,11 @@ class PhpEngine extends AbstractEngine {
 
     /**
      * Renders a template
-     * @param ride\library\template\Template $template Template to render
+     * @param \ride\library\template\Template $template Template to render
      * @return string Rendered template
-     * @throws ride\library\template\exception\ResourceNotSetException when
+     * @throws \ride\library\template\exception\ResourceNotSetException when
      * no template resource was set to the template
-     * @throws ride\library\template\exception\ResourceNotFoundException when
+     * @throws \ride\library\template\exception\ResourceNotFoundException when
      * the template resource could not be found by the engine
      */
     public function render(Template $template) {
@@ -89,12 +87,12 @@ class PhpEngine extends AbstractEngine {
 
     /**
      * Gets the template resource
-     * @param ride\library\template\Template $template Template to get the
+     * @param \ride\library\template\Template $template Template to get the
      * resource of
      * @return string Absolute path of the template resource
-     * @throws ride\library\template\exception\ResourceNotSetException when
+     * @throws \ride\library\template\exception\ResourceNotSetException when
      * no template was set to the template
-     * @throws ride\library\template\exception\ResourceNotFoundException when
+     * @throws \ride\library\template\exception\ResourceNotFoundException when
      * the template could not be found by the engine
      */
     public function getFile(Template $template) {
@@ -128,8 +126,8 @@ class PhpEngine extends AbstractEngine {
     /**
      * Gets the template file for the provided resource
      * @param string $resource Resource of the template
-     * @throws ride\library\template\exception\ResourceNotFoundException
-     * @return ride\library\system\file\File instance of a File if the source
+     * @throws \ride\library\template\exception\ResourceNotFoundException
+     * @return \ride\library\system\file\File instance of a File if the source
      * is found
      */
     protected function getThemeTemplateFile($resource, $theme = null) {
