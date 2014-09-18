@@ -124,6 +124,73 @@ class PhpEngine extends AbstractEngine {
     }
 
     /**
+     * Gets the available template resources for the provided namespace
+     * @param string $namespace
+     * @param string $theme
+     * @return array
+     */
+    public function getFiles($namespace, $theme = null) {
+        $files = array();
+
+        $basePath = '';
+        if ($this->path) {
+            $basePath = $this->path . '/';
+        }
+
+        $theme = $this->themeModel->getTheme($theme);
+        $themeHierarchy = $this->getThemeHierarchy($theme);
+
+        if ($themeHierarchy) {
+            foreach ($themeHierarchy as $theme => $null) {
+                $path = $basePath . $theme . '/' . $namespace;
+
+                $files += $this->getPathFiles($path, $basePath . $theme . '/');
+            }
+        } else {
+            $path = $basePath . $namespace;
+
+            $files += $this->getPathFiles($path, $basePath);
+        }
+
+        return $files;
+    }
+
+    /**
+     * Gets the files for the provided path
+     * @param string $path Relative path in the Ride file structure of the
+     * requested files
+     * @param string $basePath Relative path in the Ride file structure of the
+     * engine and theme
+     * @return array
+     */
+    protected function getPathFiles($path, $basePath) {
+        $files = array();
+
+        $pathDirectories = $this->fileBrowser->getFiles($path);
+        if (!$pathDirectories) {
+            return $files;
+        }
+
+        foreach ($pathDirectories as $pathDirectory) {
+            $pathFiles = $pathDirectory->read();
+            foreach ($pathFiles as $pathFile) {
+                if ($pathFile->isDirectory() || $pathFile->getExtension() != self::EXTENSION) {
+                    continue;
+                }
+
+                $pathFile = $this->fileBrowser->getRelativeFile($pathFile);
+                $filePath = $pathFile->getPath();
+                $resultPath = substr(str_replace($basePath, '', $filePath), 0, (strlen(self::EXTENSION) + 1) * -1);
+                $resultName = substr(str_replace($path . '/', '', $filePath), 0, (strlen(self::EXTENSION) + 1) * -1);
+
+                $files[$resultPath] = $resultName;
+            }
+        }
+
+        return $files;
+    }
+
+    /**
      * Gets the template file for the provided resource
      * @param string $resource Resource of the template
      * @throws \ride\library\template\exception\ResourceNotFoundException
