@@ -25,6 +25,18 @@ class PhpEngine extends AbstractEngine {
     const EXTENSION = 'php';
 
     /**
+     * Tag to open a block comment
+     * @var string
+     */
+    const COMMENT_OPEN = '/*';
+
+    /**
+     * Tag to close a block comment
+     * @var string
+     */
+    const COMMENT_CLOSE = '*/';
+
+    /**
      * Instance of the file browser
      * @var \ride\library\system\file\browser\FileBrowser
      */
@@ -89,7 +101,8 @@ class PhpEngine extends AbstractEngine {
      * Gets the template resource
      * @param \ride\library\template\Template $template Template to get the
      * resource of
-     * @return string Absolute path of the template resource
+     * @return \ride\library\system\file\File $file File instance for the
+     * template resource
      * @throws \ride\library\template\exception\ResourceNotSetException when
      * no template was set to the template
      * @throws \ride\library\template\exception\ResourceNotFoundException when
@@ -120,7 +133,7 @@ class PhpEngine extends AbstractEngine {
             $file = $this->getThemeTemplateFile($name);
         }
 
-        return $file->getAbsolutePath();
+        return $file;
     }
 
     /**
